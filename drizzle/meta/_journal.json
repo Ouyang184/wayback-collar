@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1794787200000,
+      "tag": "0000_waitlist_signups",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1794830400000,
+      "tag": "0001_compare_tracker_options",
+      "breakpoints": true
+    }
+  ]
+}

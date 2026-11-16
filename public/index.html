@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Which TrailTag dog tracker would you buy? Compare GPS at $89 for the first year with Bluetooth at $29 one-time, and join the waitlist for your choice.">
+  <meta name="theme-color" content="#fbfaf5">
+  <title>TrailTag — Dog Tracker Waitlist</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/styles.css?v=2">
+  <script src="/waitlist.js?v=2" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="#top" aria-label="TrailTag home">
+        <span class="brand-mark">
+          <svg aria-hidden="true" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"><path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        </span>TrailTag
+      </a>
+      <nav aria-label="Page navigation">
+            <a class="header-cta" href="#waitlist">Compare options</a>
+      </nav>
+    </div>
+  </header>
+  <main class="container" id="top">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-content">
+        <p class="eyebrow"><span aria-hidden="true"></span> DOG TRACKER COLLAR · IN DEVELOPMENT</p>
+        <h1 id="hero-title">When they bolt,<br class="headline-break"> know where<br class="headline-break"> to look.</h1>
+        <p class="intro">We’re exploring two versions of TrailTag to help you find your dog if they get loose.</p>
+        <div id="waitlist" class="waitlist">
+          <form id="waitlist-form" action="/api/waitlist" method="post" aria-describedby="waitlist-note">
+            <fieldset id="choice-group" class="choices">
+              <legend id="interest-question">Which collar would you buy?</legend>
+              <label class="choice">
+                <input type="radio" name="choice" value="gps" required>
+                <span class="choice-content">
+                  <span class="choice-top"><strong>GPS + cellular</strong><span><b>$89</b> first year</span></span>
+                  <span class="choice-price-detail">Collar + first year of tracking, then <strong>$49/year</strong></span>
+                  <span class="choice-description">Follow live location and get escape alerts where the collar has cell coverage.</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="choice" value="bluetooth" required>
+                <span class="choice-content">
+                  <span class="choice-top"><strong>Bluetooth</strong><span><b>$29</b> one-time</span></span>
+                  <span class="choice-description">Get a location update when a compatible phone or device passes nearby.</span>
+                </span>
+              </label>
+              <label class="choice choice-neither">
+                <input type="radio" name="choice" value="neither" required>
+                <span class="choice-content"><strong>I wouldn’t buy either</strong></span>
+              </label>
+            </fieldset>
+            <div class="form-row">
+              <input id="email" name="email" type="email" placeholder="Email address" aria-label="Email address" autocomplete="email" inputmode="email" maxlength="254" hidden disabled>
+              <button id="join-button" type="submit">
+                <span>Submit my choice</span>
+                <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+              </button>
+            </div>
+            <p id="form-error" class="form-error" role="alert" hidden></p>
+          </form>
+          <div id="confirmation" class="confirmation" role="status" tabindex="-1" hidden>
+            <svg aria-hidden="true" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg>
+            <div><strong id="confirmation-title"></strong><span id="confirmation-detail"></span></div>
+          </div>
+          <p id="waitlist-note" class="form-note">No payment or commitment. We use your email for updates about the version you choose.</p>
+          <noscript><p class="form-note">Enable JavaScript to save your choice.</p></noscript>
+        </div>
+      </div>
+      <figure class="hero-image">
+        <img src="/trailtag-concept.jpg" alt="A golden retriever wearing a green TrailTag concept collar with a small black tracker" width="1448" height="1086" fetchpriority="high">
+        <figcaption>Product concept</figcaption>
+      </figure>
+    </section>
+  </main>
+  <footer class="container site-footer"><span>TrailTag</span><span>Early-interest waitlist</span></footer>
+</body>
+</html>
