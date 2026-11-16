@@ -10,7 +10,27 @@ const confirmationDetail = document.querySelector("#confirmation-detail");
 const note = document.querySelector("#waitlist-note");
 const productNames = { gps: "GPS", bluetooth: "Bluetooth" };
 const voterStorageKey = "trailtag-voter-id";
+const sourceStorageKey = "trailtag-source";
 let sessionVoterId;
+
+// Which link brought this visitor: add ?src=tiktok (or flyer, mooseboyle, ...) to the link you share.
+function readSource() {
+  let source = "";
+  try {
+    source = new URLSearchParams(window.location.search).get("src") || "";
+  } catch {
+    source = "";
+  }
+  source = source.toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 32);
+  try {
+    if (source) sessionStorage.setItem(sourceStorageKey, source);
+    else source = sessionStorage.getItem(sourceStorageKey) || "";
+  } catch {
+    // Storage unavailable: keep whatever the address gave us.
+  }
+  return source || "direct";
+}
+const source = readSource();
 
 function getVoterId() {
   if (sessionVoterId) return sessionVoterId;
@@ -53,7 +73,7 @@ form.addEventListener("submit", async (event) => {
   error.hidden = true;
 
   try {
-    const payload = { choice, voterId: getVoterId() };
+    const payload = { choice, voterId: getVoterId(), source };
     if (product) payload.email = email.value;
     const response = await fetch("/api/waitlist", {
       method: "POST",

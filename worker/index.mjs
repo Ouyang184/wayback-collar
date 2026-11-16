@@ -4,11 +4,30 @@ const purchaseIntents = new Set(['yes', 'maybe', 'no']);
 const productChoices = new Set(['gps', 'bluetooth', 'neither']);
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const voterIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+const sourcePattern = /^[a-z0-9_-]{1,32}$/;
 const insertLegacySignup = `
   INSERT INTO waitlist_signups (email, intent) VALUES (?, ?)
   ON CONFLICT(email) DO NOTHING
 `;
+// A repeat sign-up keeps the source it first came from.
 const saveProductSignup = `
+  INSERT INTO waitlist_signups (email, intent, product, compared_at, source)
+  VALUES (?, 'yes', ?, CURRENT_TIMESTAMP, ?)
+  ON CONFLICT(email) DO UPDATE SET
+    intent = excluded.intent,
+    product = excluded.product,
+    compared_at = excluded.compared_at
+  WHERE waitlist_signups.product != excluded.product
+     OR waitlist_signups.compared_at IS NULL
+`;
+const insertNeitherVote = `
+  INSERT INTO waitlist_neither_votes (voter_id, source) VALUES (?, ?)
+  ON CONFLICT(voter_id) DO NOTHING
+`;
+const removeNeitherVote = 'DELETE FROM waitlist_neither_votes WHERE voter_id = ?';
+
+// The same statements without the source column, used only until migration 0002 has run.
+const saveProductSignupWithoutSource = `
   INSERT INTO waitlist_signups (email, intent, product, compared_at)
   VALUES (?, 'yes', ?, CURRENT_TIMESTAMP)
   ON CONFLICT(email) DO UPDATE SET
@@ -18,11 +37,34 @@ const saveProductSignup = `
   WHERE waitlist_signups.product != excluded.product
      OR waitlist_signups.compared_at IS NULL
 `;
-const insertNeitherVote = `
+const insertNeitherVoteWithoutSource = `
   INSERT INTO waitlist_neither_votes (voter_id) VALUES (?)
   ON CONFLICT(voter_id) DO NOTHING
 `;
-const removeNeitherVote = 'DELETE FROM waitlist_neither_votes WHERE voter_id = ?';
+
+function readSource(value) {
+  const source = typeof value === 'string' ? value.trim().toLowerCase() : '';
+  return sourcePattern.test(source) ? source : 'direct';
+}
+
+async function saveChoice(database, { choice, email, voterId, source }, withSource) {
+  if (choice === 'neither') {
+    const statement = withSource
+      ? database.prepare(insertNeitherVote).bind(voterId, source)
+      : database.prepare(insertNeitherVoteWithoutSource).bind(voterId);
+    const result = await statement.run();
+    return result.success;
+  }
+  const signup = withSource
+    ? database.prepare(saveProductSignup).bind(email, choice, source)
+    : database.prepare(saveProductSignupWithoutSource).bind(email, choice);
+  const results = await database.batch([signup, database.prepare(removeNeitherVote).bind(voterId)]);
+  return results.every((result) => result.success);
+}
+
+function isMissingSourceColumn(error) {
+  return /source/i.test(String(error?.message ?? error));
+}
 
 function json(body, status = 200, headers = {}) {
   return Response.json(body, {
@@ -66,16 +108,20 @@ async function signUp(request, database) {
     return errorResponse('Choose a valid purchase intent.');
   }
 
+  // A bad or missing tag never blocks a sign-up: it is saved as "direct".
+  const source = readSource(body?.source);
+
   try {
-    if (choice === 'neither') {
-      const result = await database.prepare(insertNeitherVote).bind(voterId).run();
-      if (result.success) return json({ ok: true });
-    } else if (choice !== undefined) {
-      const results = await database.batch([
-        database.prepare(saveProductSignup).bind(email, choice),
-        database.prepare(removeNeitherVote).bind(voterId),
-      ]);
-      if (results.every((result) => result.success)) return json({ ok: true });
+    if (choice !== undefined) {
+      const answer = { choice, email, voterId, source };
+      let saved;
+      try {
+        saved = await saveChoice(database, answer, true);
+      } catch (error) {
+        if (!isMissingSourceColumn(error)) throw error;
+        saved = await saveChoice(database, answer, false);
+      }
+      if (saved) return json({ ok: true });
     } else {
       const result = await database.prepare(insertLegacySignup).bind(email, intent).run();
       if (result.success) return json({ ok: true });
