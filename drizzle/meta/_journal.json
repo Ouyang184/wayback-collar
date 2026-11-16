@@ -15,6 +15,13 @@
       "when": 1794830400000,
       "tag": "0001_compare_tracker_options",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1794870906269,
+      "tag": "0002_add_signup_source",
+      "breakpoints": true
     }
   ]
 }
