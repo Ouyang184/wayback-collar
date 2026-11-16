@@ -1,6 +1,6 @@
 # TrailTag dog tracker waitlist
 
-The [live waitlist](https://trailtag-gps-waitlist.athul-p.chatgpt.site/) lets visitors choose GPS at $89 for the first year and $49 per year after, Bluetooth at $29 one-time, or neither. GPS and Bluetooth choices collect an email. Neither is anonymous.
+The [live waitlist](https://trailtag-gps-waitlist.athul-p.chatgpt.site/) lets visitors choose GPS at $89 for the first year and $49 per year after, Bluetooth at $18 one-time, or neither. GPS and Bluetooth choices collect an email. Neither is anonymous.
 
 The existing [Wayback Collar link](https://ouyang184.github.io/wayback-collar/) sends visitors to the live waitlist. The `gh-pages` branch serves that redirect.
 
