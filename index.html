@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wayback Collar</title>
+<meta name="description" content="A dog collar with a tracker tag built in. No monthly fee. Reserve one before launch.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Layout: left-aligned pitch and reserve form beside a map card. Hi-vis orange is kept for the ping and the one button. */
+  --ink: #13241d;
+  --paper: #eef2ea;
+  --card: #fbfcf9;
+  --moss: #2d6149;
+  --signal: #f25c05;
+  --line: #cdd6c8;
+  --muted: #4f6057;
+  --display: "Bricolage Grotesque", "Arial Narrow", Arial, sans-serif;
+  --body: "Public Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 17px;
+  line-height: 1.55;
+}
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+h1, h2, h3 { font-family: var(--display); line-height: 1.08; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(2.3rem, 5.4vw, 3.7rem); font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 800; letter-spacing: -0.01em; }
+h3 { font-size: 1.1rem; font-weight: 600; }
+p { margin: 0; }
+a { color: var(--moss); }
+:focus-visible { outline: 3px solid var(--signal); outline-offset: 2px; border-radius: 4px; }
+
+/* Top bar */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px 0; flex-wrap: wrap; }
+.mark { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 800; font-size: 1.2rem; letter-spacing: -0.01em; }
+.mark svg { width: 26px; height: 26px; flex: none; }
+.status { font-size: 0.85rem; font-weight: 600; color: var(--moss); border: 1.5px solid var(--moss); border-radius: 999px; padding: 4px 12px; }
+
+/* Hero */
+.hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 48px; align-items: start; padding: 28px 0 64px; }
+.pitch { display: flex; flex-direction: column; gap: 22px; }
+.lede { font-size: 1.15rem; max-width: 34em; color: var(--ink); }
+.price { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+.price strong { font-family: var(--display); font-size: 2rem; font-weight: 800; }
+.price span { color: var(--muted); }
+
+/* Reserve form */
+.reserve { background: var(--card); border: 1.5px solid var(--line); border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 18px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field > label, legend { font-weight: 600; font-size: 0.95rem; padding: 0; }
+input[type="email"] { font: inherit; color: var(--ink); background: #fff; border: 1.5px solid var(--line); border-radius: 10px; padding: 12px 14px; width: 100%; }
+input[type="email"]::placeholder { color: #8a978f; }
+fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.choices { display: flex; gap: 8px; flex-wrap: wrap; }
+.choice { position: relative; flex: 1 1 110px; }
+.choice input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.choice span { display: flex; flex-direction: column; gap: 2px; border: 1.5px solid var(--line); border-radius: 10px; padding: 9px 12px; background: #fff; font-weight: 600; font-size: 0.95rem; }
+.choice small { font-weight: 400; color: var(--muted); font-size: 0.8rem; }
+.choice input:checked + span { border-color: var(--moss); background: #e3eee4; box-shadow: inset 0 0 0 1px var(--moss); }
+.choice input:focus-visible + span { outline: 3px solid var(--signal); outline-offset: 2px; }
+.trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+button.go { font: inherit; font-family: var(--display); font-weight: 800; font-size: 1.1rem; color: var(--ink); background: var(--signal); border: 0; border-radius: 12px; padding: 14px 20px; cursor: pointer; }
+button.go:hover { filter: brightness(1.06); }
+button.go:disabled { opacity: 0.6; cursor: default; }
+.note { font-size: 0.88rem; color: var(--muted); }
+.msg { font-size: 0.95rem; font-weight: 600; min-height: 1.4em; }
+.msg.bad { color: #a32408; }
+.preview-flag { font-size: 0.88rem; font-weight: 600; background: #fff2cc; border: 1.5px solid #d9b441; border-radius: 10px; padding: 8px 12px; }
+.thanks { background: var(--ink); color: #f3f7f1; border-radius: 16px; padding: 26px; display: flex; flex-direction: column; gap: 10px; }
+.thanks h2 { color: #fff; }
+[hidden] { display: none !important; }
+
+/* Map card and collar */
+.visual { display: flex; flex-direction: column; gap: 18px; margin: 0; }
+.visual svg { display: block; width: 100%; height: auto; }
+.visual figcaption { font-size: 0.9rem; color: var(--muted); }
+.ring { transform-origin: 330px 150px; animation: ping 2.6s ease-out infinite; }
+.ring.two { animation-delay: 1.3s; }
+@keyframes ping { 0% { transform: scale(0.55); opacity: 0.7; } 100% { transform: scale(1.25); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .ring { animation: none; } }
+
+/* Sections */
+section.band { padding: 56px 0; border-top: 1.5px solid var(--line); }
+.band > .wrap { display: flex; flex-direction: column; gap: 28px; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; counter-reset: step; }
+.steps li { display: flex; flex-direction: column; gap: 8px; counter-increment: step; }
+.steps li::before { content: counter(step); font-family: var(--display); font-weight: 800; font-size: 1.1rem; width: 36px; height: 36px; border-radius: 50%; background: var(--moss); color: #fff; display: grid; place-items: center; }
+.steps p, .limits p, .qa p { color: var(--muted); }
+.limits-box { background: var(--card); border: 1.5px solid var(--line); border-left: 6px solid var(--signal); border-radius: 14px; padding: 26px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px; }
+.limits-box div { display: flex; flex-direction: column; gap: 6px; }
+.facts { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; margin: 0; border: 1.5px solid var(--line); border-radius: 14px; background: var(--card); overflow: hidden; }
+.facts div { padding: 18px 16px; border-right: 1.5px solid var(--line); display: flex; flex-direction: column; gap: 4px; }
+.facts div:last-child { border-right: 0; }
+.facts dt { font-size: 0.82rem; color: var(--muted); font-weight: 600; }
+.facts dd { margin: 0; font-family: var(--display); font-weight: 800; font-size: 1.15rem; line-height: 1.2; }
+.qa { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; }
+.qa div { display: flex; flex-direction: column; gap: 6px; }
+footer { border-top: 1.5px solid var(--line); padding: 28px 0 44px; font-size: 0.85rem; color: var(--muted); }
+footer .wrap { display: flex; flex-direction: column; gap: 6px; }
+
+@media (max-width: 860px) {
+  .hero { grid-template-columns: minmax(0, 1fr); gap: 32px; padding-bottom: 44px; }
+  .steps, .limits-box, .qa { grid-template-columns: minmax(0, 1fr); }
+  .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .facts div { border-right: 0; border-bottom: 1.5px solid var(--line); }
+  .facts div:nth-child(odd) { border-right: 1.5px solid var(--line); }
+  .facts div:last-child { border-bottom: 0; grid-column: 1 / -1; border-right: 0; }
+  section.band { padding: 44px 0; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="mark">
+      <svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="11" fill="none" stroke="#2d6149" stroke-width="4"/><circle cx="13" cy="13" r="4" fill="#f25c05"/></svg>
+      Wayback Collar
+    </div>
+    <span class="status">Pre-launch: taking reservations</span>
+  </header>
+
+  <main class="hero">
+    <div class="pitch">
+      <h1>A collar that helps your dog get found.</h1>
+      <p class="lede">The tracker tag is built into the collar. If your dog slips out, nearby phones pick up the tag and its last location shows on your phone's map. There is no monthly fee.</p>
+      <div class="price"><strong>$22</strong><span>launch price. Reserve free and pay nothing today.</span></div>
+
+      <form class="reserve" id="reserve" novalidate>
+        <p class="preview-flag" id="preview-flag" hidden>Preview only. Sign-ups are not being saved yet.</p>
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" autocomplete="email" placeholder="you@example.com" required>
+        </div>
+        <fieldset>
+          <legend>Your phone</legend>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="phone" id="phone-iphone" value="iphone" checked><span>iPhone</span></label>
+            <label class="choice"><input type="radio" name="phone" id="phone-android" value="android"><span>Android</span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Collar size</legend>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="size" id="size-small" value="small"><span>Small<small>9 to 12 in neck</small></span></label>
+            <label class="choice"><input type="radio" name="size" id="size-medium" value="medium" checked><span>Medium<small>12 to 15 in neck</small></span></label>
+            <label class="choice"><input type="radio" name="size" id="size-large" value="large"><span>Large<small>15 to 18 in neck</small></span></label>
+          </div>
+        </fieldset>
+        <div class="trap" aria-hidden="true">
+          <label for="company">Leave this empty</label>
+          <input type="text" id="company" name="company" tabindex="-1" autocomplete="off">
+        </div>
+        <button class="go" type="submit" id="go">Reserve my collar</button>
+        <p class="msg" id="msg" role="status" aria-live="polite"></p>
+        <p class="note">Reserving is free and is not an order. You get one email when the first batch is ready.</p>
+      </form>
+
+      <div class="thanks" id="thanks" hidden>
+        <h2 id="thanks-title">You're on the list.</h2>
+        <p id="thanks-body"></p>
+      </div>
+    </div>
+
+    <figure class="visual">
+      <svg viewBox="0 0 440 420" role="img" aria-label="Map showing the place a collar tag was last picked up, a few streets from home">
+        <defs><clipPath id="card"><rect width="440" height="420" rx="18"/></clipPath></defs>
+        <rect width="440" height="420" rx="18" fill="#fbfcf9" stroke="#cdd6c8" stroke-width="1.5"/>
+        <g clip-path="url(#card)">
+          <g stroke="#e0e7db" stroke-width="16" stroke-linecap="round" fill="none">
+            <path d="M-10 110H450"/><path d="M-10 250H450"/><path d="M120 -10V430"/><path d="M300 -10V430"/><path d="M-10 372L450 318"/>
+          </g>
+          <rect x="146" y="136" width="128" height="88" rx="12" fill="#d3e6d2"/>
+          <g fill="#e8ede4">
+            <rect x="20" y="20" width="76" height="64" rx="8"/><rect x="146" y="20" width="128" height="64" rx="8"/><rect x="326" y="20" width="96" height="64" rx="8"/>
+            <rect x="20" y="136" width="76" height="88" rx="8"/><rect x="20" y="276" width="76" height="60" rx="8"/><rect x="146" y="276" width="128" height="44" rx="8"/>
+            <rect x="326" y="276" width="96" height="30" rx="8"/><rect x="326" y="190" width="96" height="34" rx="8"/>
+          </g>
+          <path d="M70 318C120 292 170 256 232 250S300 222 300 190 318 160 330 150" fill="none" stroke="#2d6149" stroke-width="3.5" stroke-dasharray="1 10" stroke-linecap="round"/>
+          <g transform="translate(70 318)"><circle r="17" fill="#13241d"/><path d="M-8 2L0 -6L8 2V8H-8Z" fill="#fbfcf9"/></g>
+          <circle class="ring" cx="330" cy="150" r="46" fill="none" stroke="#f25c05" stroke-width="3"/>
+          <circle class="ring two" cx="330" cy="150" r="46" fill="none" stroke="#f25c05" stroke-width="3"/>
+          <circle cx="330" cy="150" r="30" fill="#f25c05" opacity="0.18"/>
+          <circle cx="330" cy="150" r="11" fill="#f25c05" stroke="#fbfcf9" stroke-width="3"/>
+          <g transform="translate(206 52)">
+            <rect width="212" height="52" rx="12" fill="#13241d"/>
+            <text x="16" y="22" fill="#ffffff" font-family="Public Sans, system-ui, sans-serif" font-size="14" font-weight="600">Last seen 2 minutes ago</text>
+            <text x="16" y="40" fill="#b9c8be" font-family="Public Sans, system-ui, sans-serif" font-size="12.5">Picked up by a phone nearby</text>
+          </g>
+        </g>
+      </svg>
+      <svg viewBox="0 0 440 90" role="img" aria-label="The collar laid flat, with the tracker tag in a pocket in the middle of the band">
+        <rect x="8" y="28" width="424" height="34" rx="17" fill="#2d6149"/>
+        <path d="M30 35H410M30 55H410" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1.5" stroke-dasharray="6 6" fill="none"/>
+        <g fill="#eef2ea"><circle cx="40" cy="45" r="4"/><circle cx="62" cy="45" r="4"/><circle cx="84" cy="45" r="4"/></g>
+        <rect x="366" y="16" width="46" height="58" rx="9" fill="none" stroke="#13241d" stroke-width="6"/>
+        <circle cx="220" cy="45" r="31" fill="#13241d"/><circle cx="220" cy="45" r="19" fill="#f25c05"/><circle cx="220" cy="45" r="5" fill="#13241d"/>
+      </svg>
+      <figcaption>The tag sits in a sealed pocket in the band, so nothing dangles or gets chewed off.</figcaption>
+    </figure>
+  </main>
+</div>
+
+<section class="band">
+  <div class="wrap">
+    <h2>How it works</h2>
+    <ol class="steps">
+      <li><h3>Pair it with your phone</h3><p>Add the collar in Apple Find My on an iPhone or Google Find Hub on Android. It takes about a minute.</p></li>
+      <li><h3>Your dog wears it like any collar</h3><p>There is no charging cable. The tag runs on a coin battery you can replace.</p></li>
+      <li><h3>If your dog gets out, open the map</h3><p>Each time a phone on the same network passes close by, the location updates on your map.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="band limits">
+  <div class="wrap">
+    <h2>What it can't do</h2>
+    <div class="limits-box">
+      <div><h3>It is not GPS</h3><p>The tag uses Bluetooth and other people's phones. In town it updates often. On a trail or a farm with nobody around, it may not update at all.</p></div>
+      <div><h3>There is no live trail</h3><p>You see the last place a phone picked up the tag. You do not see a dot moving in real time.</p></div>
+      <div><h3>It is not for every dog</h3><p>For a dog that runs for miles in open country, a GPS collar with a monthly plan is the better tool.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <h2>The details</h2>
+    <dl class="facts">
+      <div><dt>Price</dt><dd>$22, once</dd></div>
+      <div><dt>Monthly fee</dt><dd>$0</dd></div>
+      <div><dt>Phones</dt><dd>iPhone or Android</dd></div>
+      <div><dt>Neck sizes</dt><dd>9 to 18 in</dd></div>
+      <div><dt>Battery</dt><dd>Replaceable coin cell</dd></div>
+    </dl>
+    <div class="qa">
+      <div><h3>When will it ship?</h3><p>Reservations decide how big the first batch is. If it goes ahead, you get an email with the ship date. If it doesn't, you get an email saying so.</p></div>
+      <div><h3>Is reserving an order?</h3><p>No. Nothing is charged and you can ignore the email when it comes.</p></div>
+      <div><h3>What happens to my email?</h3><p>It is used for that one launch email and nothing else. It is never sold or shared.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>Wayback Collar is a small pre-launch project. The details above describe the planned product and may change before launch.</p>
+    <p>Apple and Find My are trademarks of Apple Inc. Google and Find Hub are trademarks of Google LLC. Wayback Collar is not affiliated with either company.</p>
+  </div>
+</footer>
+
+<script>
+/* ---------- Set these two values once the sign-up database exists ---------- */
+var CONFIG = {
+  SUPABASE_URL: "https://eiywvsqjnhplwmbdeosl.supabase.co",
+  SUPABASE_KEY: "sb_publishable_Muq_QsrxWYVHAgMzFtRkuA_kAOwe4NW"   // publishable key: safe in a public page, it can only add rows
+};
+/* --------------------------------------------------------------------------- */
+
+(function () {
+  var configured = Boolean(CONFIG.SUPABASE_URL && CONFIG.SUPABASE_KEY);
+  var form = document.getElementById("reserve");
+  var msg = document.getElementById("msg");
+  var go = document.getElementById("go");
+  var flag = document.getElementById("preview-flag");
+
+  // Which promotion sent this visitor: add ?src=tiktok (or flyer, facebook, ...) to the link you share.
+  function readSource() {
+    var raw = "";
+    try { raw = new URLSearchParams(window.location.search).get("src") || ""; } catch (e) { raw = ""; }
+    raw = raw.toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 32);
+    return raw || "direct";
+  }
+  var src = readSource();
+
+  function save(table, row) {
+    return fetch(CONFIG.SUPABASE_URL.replace(/\/+$/, "") + "/rest/v1/" + table, {
+      method: "POST",
+      headers: {
+        "apikey": CONFIG.SUPABASE_KEY,
+        "Authorization": "Bearer " + CONFIG.SUPABASE_KEY,
+        "Content-Type": "application/json",
+        "Prefer": "return=minimal"
+      },
+      body: JSON.stringify(row)
+    });
+  }
+
+  if (!configured) {
+    flag.hidden = false;
+  } else {
+    // Count one visit per browser session, so sign-ups can be compared with visitors per source.
+    var counted = false;
+    try { counted = sessionStorage.getItem("wb_visit") === "1"; } catch (e) { counted = false; }
+    if (!counted) {
+      save("visits", { src: src }).then(function () {
+        try { sessionStorage.setItem("wb_visit", "1"); } catch (e) { /* storage unavailable */ }
+      }).catch(function () { /* a missed visit count should never break the page */ });
+    }
+  }
+
+  function say(text, bad) {
+    msg.textContent = text;
+    msg.className = bad ? "msg bad" : "msg";
+  }
+
+  function picked(name) {
+    var el = form.querySelector('input[name="' + name + '"]:checked');
+    return el ? el.value : null;
+  }
+
+  function showThanks(email, already) {
+    document.getElementById("thanks-title").textContent = already ? "You were already on the list." : "You're on the list.";
+    document.getElementById("thanks-body").textContent =
+      "One email will go to " + email + " when the first batch is ready to order. Nothing has been charged.";
+    form.hidden = true;
+    document.getElementById("thanks").hidden = false;
+  }
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    var email = document.getElementById("email").value.trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || email.length > 254) {
+      say("Enter a valid email address, like you@example.com.", true);
+      document.getElementById("email").focus();
+      return;
+    }
+    if (document.getElementById("company").value) { return; } // filled only by bots
+    if (!configured) {
+      say("Preview only. This sign-up was not saved.", true);
+      return;
+    }
+    go.disabled = true;
+    go.textContent = "Saving";
+    say("", false);
+    save("signups", { email: email, phone: picked("phone"), dog_size: picked("size"), src: src })
+      .then(function (res) {
+        if (res.ok) { showThanks(email, false); return; }
+        if (res.status === 409) { showThanks(email, true); return; }
+        throw new Error("status " + res.status);
+      })
+      .catch(function () {
+        go.disabled = false;
+        go.textContent = "Reserve my collar";
+        say("Your spot was not saved. Check your connection and try again.", true);
+      });
+  });
+})();
+</script>
+</body>
+</html>
